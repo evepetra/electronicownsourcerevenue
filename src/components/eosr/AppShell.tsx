@@ -7,7 +7,7 @@ import type { Role } from "@/lib/eosr";
 
 type NavItem = { no: string; label: string; to: string; roles: Role[] };
 
-const ALL: Role[] = ["ADMIN", "REVENUE_OFFICER", "CASHIER", "AUDITOR"];
+const ALL: Role[] = ["ADMIN", "COUNCIL_ADMIN", "REVENUE_OFFICER", "CASHIER", "AUDITOR"];
 
 export const NAV: NavItem[] = [
   { no: "01", label: "Dashboard", to: "/", roles: ALL },
@@ -15,36 +15,37 @@ export const NAV: NavItem[] = [
     no: "02",
     label: "Taxpayer Register",
     to: "/taxpayers",
-    roles: ["ADMIN", "REVENUE_OFFICER", "AUDITOR"],
+    roles: ["ADMIN", "COUNCIL_ADMIN", "REVENUE_OFFICER", "AUDITOR"],
   },
   {
     no: "03",
     label: "Billing & Invoices",
     to: "/billing",
-    roles: ["ADMIN", "REVENUE_OFFICER", "AUDITOR"],
+    roles: ["ADMIN", "COUNCIL_ADMIN", "REVENUE_OFFICER", "AUDITOR"],
   },
   {
     no: "04",
     label: "Mobile-Money Payments",
     to: "/payments",
-    roles: ["ADMIN", "REVENUE_OFFICER", "CASHIER"],
+    roles: ["ADMIN", "COUNCIL_ADMIN", "REVENUE_OFFICER", "CASHIER"],
   },
   { no: "05", label: "Receipt Verification", to: "/receipts", roles: ALL },
   {
     no: "06",
     label: "Bank Reconciliation",
     to: "/reconciliation",
-    roles: ["ADMIN", "AUDITOR", "CASHIER"],
+    roles: ["ADMIN", "COUNCIL_ADMIN", "AUDITOR", "CASHIER"],
   },
   { no: "07", label: "Reports", to: "/reports", roles: ALL },
-  { no: "08", label: "Audit Log", to: "/audit", roles: ["ADMIN", "AUDITOR"] },
+  { no: "08", label: "Audit Log", to: "/audit", roles: ["ADMIN", "COUNCIL_ADMIN", "AUDITOR"] },
   {
     no: "09",
     label: "Arrears",
     to: "/arrears",
-    roles: ["ADMIN", "REVENUE_OFFICER", "AUDITOR"],
+    roles: ["ADMIN", "COUNCIL_ADMIN", "REVENUE_OFFICER", "AUDITOR"],
   },
   { no: "10", label: "Administration", to: "/admin", roles: ["ADMIN"] },
+  { no: "11", label: "Council Profile", to: "/council", roles: ALL },
 ];
 
 function initials(name: string) {
@@ -140,6 +141,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                 ))}
               </div>
             )}
+
+            <Link
+              to="/council"
+              onClick={() => setSwitcherOpen(false)}
+              className="num mt-2 block rounded-sm border border-line px-2 py-1.5 text-center text-[9px] tracking-wider text-muted-foreground transition-colors hover:text-foreground"
+            >
+              VIEW COUNCIL PROFILE →
+            </Link>
 
             <div className="mt-2 flex items-center justify-between">
               <span className="num rounded-sm bg-civic/10 px-1.5 py-0.5 text-[9px] font-medium tracking-wider text-civic ring-1 ring-civic/25">
