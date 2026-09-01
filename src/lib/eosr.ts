@@ -7,7 +7,13 @@ export const REVENUE_SOURCES = [
 
 export const CHANNELS = ["MOMO", "USSD", "CASHIER"] as const;
 
-export const ROLES = ["ADMIN", "REVENUE_OFFICER", "CASHIER", "AUDITOR"] as const;
+export const ROLES = [
+  "ADMIN",
+  "COUNCIL_ADMIN",
+  "REVENUE_OFFICER",
+  "CASHIER",
+  "AUDITOR",
+] as const;
 export type Role = (typeof ROLES)[number];
 
 export function ugx(value: number | string | null | undefined): string {
