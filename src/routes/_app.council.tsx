@@ -22,6 +22,7 @@ import {
   useCouncilSpending,
   useGovernanceMutation,
 } from "@/lib/governance";
+import { CouncilDocuments } from "@/components/eosr/CouncilDocuments";
 
 export const Route = createFileRoute("/_app/council")({
   head: () => ({
@@ -220,6 +221,14 @@ function CouncilPage() {
           </div>
         )}
       </Panel>
+
+      <CouncilDocuments
+        councilId={council.id}
+        councilName={council.name}
+        editable={editable}
+        fiscalYear={FISCAL_YEAR}
+        uploadedBy={user?.id ?? null}
+      />
 
       {editable ? (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">

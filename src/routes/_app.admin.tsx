@@ -194,6 +194,78 @@ function AdminPage() {
         </div>
       </Panel>
 
+      <Panel title="Register a council" meta="SYSTEM ADMINISTRATOR ONLY">
+        <form
+          className="grid gap-3 md:grid-cols-4"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const formEl = e.currentTarget as HTMLFormElement;
+            const f = new FormData(formEl);
+            const { error } = await supabase.from("councils").insert({
+              name: String(f.get("name")),
+              code: String(f.get("code")).toUpperCase(),
+              district: String(f.get("district")),
+              physical_address: String(f.get("physical_address") || ""),
+              postal_address: String(f.get("postal_address") || "") || null,
+              phone: String(f.get("phone") || ""),
+              email: String(f.get("email") || ""),
+              website: String(f.get("website") || "") || null,
+              mayor: String(f.get("mayor") || "") || null,
+              town_clerk: String(f.get("town_clerk") || "") || null,
+            });
+            if (error) {
+              toast.error(error.message);
+              return;
+            }
+            await logAudit({
+              actor: profile?.email ?? "admin",
+              action: "COUNCIL_CREATED",
+              entity: "councils",
+              details: String(f.get("name")),
+            });
+            toast.success("Council registered");
+            formEl.reset();
+            await qc.invalidateQueries({ queryKey: ["councils"] });
+          }}
+        >
+          <Field label="Council name">
+            <input name="name" required className={inputClass} placeholder="Wakiso Town Council" />
+          </Field>
+          <Field label="Code">
+            <input name="code" required maxLength={5} className={inputClass} placeholder="WKS" />
+          </Field>
+          <Field label="District">
+            <input name="district" required className={inputClass} placeholder="Wakiso" />
+          </Field>
+          <Field label="Telephone">
+            <input name="phone" className={inputClass} placeholder="+256 414 000 000" />
+          </Field>
+          <Field label="Physical address">
+            <input name="physical_address" className={inputClass} placeholder="Plot 1, Main Street" />
+          </Field>
+          <Field label="Postal address">
+            <input name="postal_address" className={inputClass} placeholder="P.O. Box 1, Wakiso" />
+          </Field>
+          <Field label="Email">
+            <input name="email" type="email" className={inputClass} placeholder="info@wakisotc.go.ug" />
+          </Field>
+          <Field label="Website">
+            <input name="website" className={inputClass} placeholder="https://…" />
+          </Field>
+          <Field label="Mayor / Chairperson">
+            <input name="mayor" className={inputClass} />
+          </Field>
+          <Field label="Town clerk">
+            <input name="town_clerk" className={inputClass} />
+          </Field>
+          <div className="flex items-end">
+            <button type="submit" className={buttonClass}>
+              REGISTER COUNCIL
+            </button>
+          </div>
+        </form>
+      </Panel>
+
       <Panel title="Fee schedule" meta={`${(fees.data ?? []).length} ITEMS · ${council?.name ?? ""}`} bodyClassName="p-0">
         <form onSubmit={addFee} className="grid gap-3 border-b border-line p-4 md:grid-cols-5">
           <Field label="Revenue source">

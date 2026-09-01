@@ -112,3 +112,121 @@ export function useGovernanceMutation(table: "council_budgets" | "council_spendi
     onSuccess: () => void qc.invalidateQueries({ queryKey: [table] }),
   });
 }
+
+export type CouncilDocument = {
+  id: string;
+  council_id: string;
+  doc_type: string;
+  title: string;
+  fiscal_year: string;
+  storage_path: string;
+  file_name: string;
+  file_size: number;
+  mime_type: string;
+  notes: string | null;
+  uploaded_by: string | null;
+  created_at: string;
+};
+
+export const DOC_TYPES = ["BUDGET", "MINUTES", "SPENDING_REPORT", "OTHER"] as const;
+export const DOC_TYPE_LABEL: Record<string, string> = {
+  BUDGET: "Budget document",
+  MINUTES: "Meeting minutes",
+  SPENDING_REPORT: "Spending report",
+  OTHER: "Other",
+};
+export const DOC_BUCKET = "council-documents";
+
+export function useCouncilDocuments(councilId: string | null) {
+  return useQuery({
+    queryKey: ["council_documents", councilId],
+    enabled: !!councilId,
+    queryFn: () =>
+      run<CouncilDocument[]>(
+        supabase
+          .from("council_documents")
+          .select("*")
+          .eq("council_id", councilId!)
+          .order("created_at", { ascending: false }),
+      ),
+  });
+}
+
+export function useUploadCouncilDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: {
+      councilId: string;
+      file: File;
+      docType: string;
+      title: string;
+      fiscalYear: string;
+      notes: string | null;
+      uploadedBy: string | null;
+    }) => {
+      const safe = input.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `${input.councilId}/${Date.now()}-${safe}`;
+      const up = await supabase.storage.from(DOC_BUCKET).upload(path, input.file, {
+        contentType: input.file.type || "application/octet-stream",
+        upsert: false,
+      });
+      if (up.error) throw new Error(up.error.message);
+      const { error } = await supabase.from("council_documents").insert({
+        council_id: input.councilId,
+        doc_type: input.docType,
+        title: input.title,
+        fiscal_year: input.fiscalYear,
+        storage_path: path,
+        file_name: input.file.name,
+        file_size: input.file.size,
+        mime_type: input.file.type || "application/octet-stream",
+        notes: input.notes,
+        uploaded_by: input.uploadedBy,
+      });
+      if (error) {
+        await supabase.storage.from(DOC_BUCKET).remove([path]);
+        throw new Error(error.message);
+      }
+    },
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["council_documents"] }),
+  });
+}
+
+export function useDeleteCouncilDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (doc: CouncilDocument) => {
+      const { error } = await supabase.from("council_documents").delete().eq("id", doc.id);
+      if (error) throw new Error(error.message);
+      await supabase.storage.from(DOC_BUCKET).remove([doc.storage_path]);
+    },
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["council_documents"] }),
+  });
+}
+
+export async function openCouncilDocument(path: string) {
+  const { data, error } = await supabase.storage.from(DOC_BUCKET).createSignedUrl(path, 300);
+  if (error || !data?.signedUrl) throw new Error(error?.message ?? "Could not open document");
+  window.open(data.signedUrl, "_blank", "noopener");
+}
+
+/** All councils' governance rows at once — powers the multi-council dashboard. */
+export function useAllGovernance() {
+  return useQuery({
+    queryKey: ["governance_all"],
+    queryFn: async () => {
+      const [b, s, m] = await Promise.all([
+        supabase.from("council_budgets").select("*"),
+        supabase.from("council_spending").select("*"),
+        supabase.from("council_meetings").select("*").order("meeting_at"),
+      ]);
+      const err = b.error ?? s.error ?? m.error;
+      if (err) throw new Error(err.message);
+      return {
+        budgets: (b.data ?? []) as CouncilBudget[],
+        spending: (s.data ?? []) as CouncilSpending[],
+        meetings: (m.data ?? []) as CouncilMeeting[],
+      };
+    },
+  });
+}
