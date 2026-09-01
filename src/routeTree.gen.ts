@@ -9,50 +9,288 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as AppAdminRouteImport } from './routes/_app.admin'
+import { Route as AppArrearsRouteImport } from './routes/_app.arrears'
+import { Route as AppAuditRouteImport } from './routes/_app.audit'
+import { Route as AppBillingRouteImport } from './routes/_app.billing'
+import { Route as AppPaymentsRouteImport } from './routes/_app.payments'
+import { Route as AppReceiptsRouteImport } from './routes/_app.receipts'
+import { Route as AppReconciliationRouteImport } from './routes/_app.reconciliation'
+import { Route as AppReportsRouteImport } from './routes/_app.reports'
+import { Route as AppTaxpayersRouteImport } from './routes/_app.taxpayers'
 
-const IndexRoute = IndexRouteImport.update({
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppArrearsRoute = AppArrearsRouteImport.update({
+  id: '/arrears',
+  path: '/arrears',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAuditRoute = AppAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBillingRoute = AppBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPaymentsRoute = AppPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReceiptsRoute = AppReceiptsRouteImport.update({
+  id: '/receipts',
+  path: '/receipts',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReconciliationRoute = AppReconciliationRouteImport.update({
+  id: '/reconciliation',
+  path: '/reconciliation',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReportsRoute = AppReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTaxpayersRoute = AppTaxpayersRouteImport.update({
+  id: '/taxpayers',
+  path: '/taxpayers',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AppIndexRoute
+  '/auth': typeof AuthRoute
+  '/admin': typeof AppAdminRoute
+  '/arrears': typeof AppArrearsRoute
+  '/audit': typeof AppAuditRoute
+  '/billing': typeof AppBillingRoute
+  '/payments': typeof AppPaymentsRoute
+  '/receipts': typeof AppReceiptsRoute
+  '/reconciliation': typeof AppReconciliationRoute
+  '/reports': typeof AppReportsRoute
+  '/taxpayers': typeof AppTaxpayersRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/admin': typeof AppAdminRoute
+  '/arrears': typeof AppArrearsRoute
+  '/audit': typeof AppAuditRoute
+  '/billing': typeof AppBillingRoute
+  '/payments': typeof AppPaymentsRoute
+  '/receipts': typeof AppReceiptsRoute
+  '/reconciliation': typeof AppReconciliationRoute
+  '/reports': typeof AppReportsRoute
+  '/taxpayers': typeof AppTaxpayersRoute
+  '/': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_app/admin': typeof AppAdminRoute
+  '/_app/arrears': typeof AppArrearsRoute
+  '/_app/audit': typeof AppAuditRoute
+  '/_app/billing': typeof AppBillingRoute
+  '/_app/payments': typeof AppPaymentsRoute
+  '/_app/receipts': typeof AppReceiptsRoute
+  '/_app/reconciliation': typeof AppReconciliationRoute
+  '/_app/reports': typeof AppReportsRoute
+  '/_app/taxpayers': typeof AppTaxpayersRoute
+  '/_app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/admin'
+    | '/arrears'
+    | '/audit'
+    | '/billing'
+    | '/payments'
+    | '/receipts'
+    | '/reconciliation'
+    | '/reports'
+    | '/taxpayers'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/auth'
+    | '/admin'
+    | '/arrears'
+    | '/audit'
+    | '/billing'
+    | '/payments'
+    | '/receipts'
+    | '/reconciliation'
+    | '/reports'
+    | '/taxpayers'
+    | '/'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/auth'
+    | '/_app/admin'
+    | '/_app/arrears'
+    | '/_app/audit'
+    | '/_app/billing'
+    | '/_app/payments'
+    | '/_app/receipts'
+    | '/_app/reconciliation'
+    | '/_app/reports'
+    | '/_app/taxpayers'
+    | '/_app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/': {
+      id: '/_app/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/admin': {
+      id: '/_app/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/arrears': {
+      id: '/_app/arrears'
+      path: '/arrears'
+      fullPath: '/arrears'
+      preLoaderRoute: typeof AppArrearsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/audit': {
+      id: '/_app/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof AppAuditRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/billing': {
+      id: '/_app/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof AppBillingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/payments': {
+      id: '/_app/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof AppPaymentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/receipts': {
+      id: '/_app/receipts'
+      path: '/receipts'
+      fullPath: '/receipts'
+      preLoaderRoute: typeof AppReceiptsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/reconciliation': {
+      id: '/_app/reconciliation'
+      path: '/reconciliation'
+      fullPath: '/reconciliation'
+      preLoaderRoute: typeof AppReconciliationRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/reports': {
+      id: '/_app/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AppReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/taxpayers': {
+      id: '/_app/taxpayers'
+      path: '/taxpayers'
+      fullPath: '/taxpayers'
+      preLoaderRoute: typeof AppTaxpayersRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
 
+interface AppRouteChildren {
+  AppAdminRoute: typeof AppAdminRoute
+  AppArrearsRoute: typeof AppArrearsRoute
+  AppAuditRoute: typeof AppAuditRoute
+  AppBillingRoute: typeof AppBillingRoute
+  AppPaymentsRoute: typeof AppPaymentsRoute
+  AppReceiptsRoute: typeof AppReceiptsRoute
+  AppReconciliationRoute: typeof AppReconciliationRoute
+  AppReportsRoute: typeof AppReportsRoute
+  AppTaxpayersRoute: typeof AppTaxpayersRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAdminRoute: AppAdminRoute,
+  AppArrearsRoute: AppArrearsRoute,
+  AppAuditRoute: AppAuditRoute,
+  AppBillingRoute: AppBillingRoute,
+  AppPaymentsRoute: AppPaymentsRoute,
+  AppReceiptsRoute: AppReceiptsRoute,
+  AppReconciliationRoute: AppReconciliationRoute,
+  AppReportsRoute: AppReportsRoute,
+  AppTaxpayersRoute: AppTaxpayersRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
