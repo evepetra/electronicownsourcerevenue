@@ -62,6 +62,7 @@ function initials(name: string) {
 export function AppShell({ children }: { children: ReactNode }) {
   const { profile, role, signOut, user } = useAuth();
   const { councils, council, setCouncilId } = useCouncil();
+  const { theme, toggle } = useTheme();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [now, setNow] = useState<string>("");
