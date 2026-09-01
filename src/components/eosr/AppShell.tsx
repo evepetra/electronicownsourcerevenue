@@ -1,7 +1,9 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Moon, Sun } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useCouncil } from "@/lib/council";
+import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/lib/eosr";
 
