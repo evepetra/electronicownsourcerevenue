@@ -1,7 +1,9 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Moon, Sun } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useCouncil } from "@/lib/council";
+import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/lib/eosr";
 
@@ -60,6 +62,7 @@ function initials(name: string) {
 export function AppShell({ children }: { children: ReactNode }) {
   const { profile, role, signOut, user } = useAuth();
   const { councils, council, setCouncilId } = useCouncil();
+  const { theme, toggle } = useTheme();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [now, setNow] = useState<string>("");
@@ -221,6 +224,15 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="num hidden text-[11px] lg:inline">{now}</span>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggle}
+              title="Toggle light / dark theme"
+              className="num flex items-center gap-2 rounded-md border border-line bg-panel px-2.5 py-1.5 text-[10px] tracking-wider text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {theme === "dark" ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
+              {theme === "dark" ? "LIGHT" : "DARK"}
+            </button>
             <span className="flex items-center gap-2 rounded-md border border-line bg-panel px-2.5 py-1.5">
               <span className="size-1.5 rounded-full bg-civic" />
               <span className="num text-[10px] tracking-wider text-muted-foreground">FEED · LIVE</span>

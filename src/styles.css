@@ -56,7 +56,8 @@
   --color-chart-5: var(--destructive);
 }
 
-:root {
+:root,
+.dark {
   --radius: 0.375rem;
   --background: oklch(0.16 0.008 158);
   --foreground: oklch(0.94 0.006 158);
@@ -77,6 +78,27 @@
   --sky: oklch(0.77 0.12 232);
 }
 
+/* light theme — paper-white civic surface, same emerald accent */
+.light {
+  --background: oklch(0.985 0.004 158);
+  --foreground: oklch(0.21 0.012 158);
+  --card: oklch(1 0 0);
+  --popover: oklch(0.965 0.005 158);
+  --primary: oklch(0.56 0.13 163);
+  --primary-foreground: oklch(0.99 0.01 163);
+  --secondary: oklch(0.95 0.006 158);
+  --muted: oklch(0.95 0.006 158);
+  --muted-foreground: oklch(0.5 0.014 158);
+  --accent: oklch(0.93 0.008 158);
+  --destructive: oklch(0.55 0.2 27);
+  --border: oklch(0.89 0.008 158);
+  --input: oklch(0.89 0.008 158);
+  --ring: oklch(0.56 0.13 163);
+  --warn: oklch(0.62 0.14 75);
+  --violet: oklch(0.55 0.16 295);
+  --sky: oklch(0.55 0.13 232);
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -84,6 +106,10 @@
 
   html {
     color-scheme: dark;
+  }
+
+  html.light {
+    color-scheme: light;
   }
 
   body {
