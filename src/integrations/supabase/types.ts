@@ -177,6 +177,62 @@ export type Database = {
           },
         ]
       }
+      council_documents: {
+        Row: {
+          council_id: string
+          created_at: string
+          doc_type: string
+          file_name: string
+          file_size: number
+          fiscal_year: string
+          id: string
+          mime_type: string
+          notes: string | null
+          storage_path: string
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          council_id: string
+          created_at?: string
+          doc_type?: string
+          file_name: string
+          file_size?: number
+          fiscal_year?: string
+          id?: string
+          mime_type?: string
+          notes?: string | null
+          storage_path: string
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          council_id?: string
+          created_at?: string
+          doc_type?: string
+          file_name?: string
+          file_size?: number
+          fiscal_year?: string
+          id?: string
+          mime_type?: string
+          notes?: string | null
+          storage_path?: string
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "council_documents_council_id_fkey"
+            columns: ["council_id"]
+            isOneToOne: false
+            referencedRelation: "councils"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       council_meetings: {
         Row: {
           agenda: string | null
