@@ -49,7 +49,7 @@ function CouncilDashboard() {
     const now = new Date();
     return councils.map((c) => {
       const allocated = budgets
-        .filter((b) => b.council_id === c.id)
+        .filter((b) => b.council_id === c.id && b.approval_status === "APPROVED")
         .reduce((s, b) => s + Number(b.allocated_amount), 0);
       const spent = spending
         .filter((s2) => s2.council_id === c.id)

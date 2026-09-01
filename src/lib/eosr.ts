@@ -10,6 +10,7 @@ export const CHANNELS = ["MOMO", "USSD", "CASHIER"] as const;
 export const ROLES = [
   "ADMIN",
   "COUNCIL_ADMIN",
+  "MAYOR",
   "REVENUE_OFFICER",
   "CASHIER",
   "AUDITOR",
@@ -76,6 +77,10 @@ export const statusTone: Record<string, string> = {
   OVERDUE: "text-destructive ring-destructive/25 bg-destructive/10",
   UNMATCHED: "text-destructive ring-destructive/25 bg-destructive/10",
   VOIDED: "text-destructive ring-destructive/25 bg-destructive/10",
+  APPROVED: "text-civic ring-civic/25 bg-civic/10",
+  SUBMITTED: "text-sky ring-sky/25 bg-sky/10",
+  DRAFT: "text-muted-foreground ring-border bg-accent",
+  RETURNED: "text-destructive ring-destructive/25 bg-destructive/10",
   WRITTEN_OFF: "text-muted-foreground ring-border bg-accent",
 };
 

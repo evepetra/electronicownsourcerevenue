@@ -9,7 +9,7 @@ import type { Role } from "@/lib/eosr";
 
 type NavItem = { no: string; label: string; to: string; roles: Role[] };
 
-const ALL: Role[] = ["ADMIN", "COUNCIL_ADMIN", "REVENUE_OFFICER", "CASHIER", "AUDITOR"];
+const ALL: Role[] = ["ADMIN", "COUNCIL_ADMIN", "MAYOR", "REVENUE_OFFICER", "CASHIER", "AUDITOR"];
 
 export const NAV: NavItem[] = [
   { no: "01", label: "Dashboard", to: "/", roles: ALL },
@@ -17,13 +17,13 @@ export const NAV: NavItem[] = [
     no: "02",
     label: "Taxpayer Register",
     to: "/taxpayers",
-    roles: ["ADMIN", "COUNCIL_ADMIN", "REVENUE_OFFICER", "AUDITOR"],
+    roles: ["ADMIN", "COUNCIL_ADMIN", "MAYOR", "REVENUE_OFFICER", "AUDITOR"],
   },
   {
     no: "03",
     label: "Billing & Invoices",
     to: "/billing",
-    roles: ["ADMIN", "COUNCIL_ADMIN", "REVENUE_OFFICER", "AUDITOR"],
+    roles: ["ADMIN", "COUNCIL_ADMIN", "MAYOR", "REVENUE_OFFICER", "AUDITOR"],
   },
   {
     no: "04",
@@ -36,15 +36,15 @@ export const NAV: NavItem[] = [
     no: "06",
     label: "Bank Reconciliation",
     to: "/reconciliation",
-    roles: ["ADMIN", "COUNCIL_ADMIN", "AUDITOR", "CASHIER"],
+    roles: ["ADMIN", "COUNCIL_ADMIN", "MAYOR", "AUDITOR", "CASHIER"],
   },
   { no: "07", label: "Reports", to: "/reports", roles: ALL },
-  { no: "08", label: "Audit Log", to: "/audit", roles: ["ADMIN", "COUNCIL_ADMIN", "AUDITOR"] },
+  { no: "08", label: "Audit Log", to: "/audit", roles: ["ADMIN", "COUNCIL_ADMIN", "MAYOR", "AUDITOR"] },
   {
     no: "09",
     label: "Arrears",
     to: "/arrears",
-    roles: ["ADMIN", "COUNCIL_ADMIN", "REVENUE_OFFICER", "AUDITOR"],
+    roles: ["ADMIN", "COUNCIL_ADMIN", "MAYOR", "REVENUE_OFFICER", "AUDITOR"],
   },
   { no: "10", label: "Administration", to: "/admin", roles: ["ADMIN"] },
   { no: "11", label: "Council Profile", to: "/council", roles: ALL },
