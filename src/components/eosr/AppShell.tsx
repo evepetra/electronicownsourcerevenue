@@ -48,6 +48,7 @@ export const NAV: NavItem[] = [
   },
   { no: "10", label: "Administration", to: "/admin", roles: ["ADMIN"] },
   { no: "11", label: "Council Profile", to: "/council", roles: ALL },
+  { no: "12", label: "Council Dashboard", to: "/council-dashboard", roles: ALL },
 ];
 
 function initials(name: string) {
