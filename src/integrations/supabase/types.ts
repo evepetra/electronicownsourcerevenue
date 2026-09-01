@@ -139,32 +139,50 @@ export type Database = {
       council_budgets: {
         Row: {
           allocated_amount: number
+          approval_status: string
           category: string
           council_id: string
           created_at: string
           fiscal_year: string
           id: string
           notes: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          submitted_at: string | null
+          submitted_by: string | null
           updated_at: string
         }
         Insert: {
           allocated_amount?: number
+          approval_status?: string
           category: string
           council_id: string
           created_at?: string
           fiscal_year: string
           id?: string
           notes?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
           updated_at?: string
         }
         Update: {
           allocated_amount?: number
+          approval_status?: string
           category?: string
           council_id?: string
           created_at?: string
           fiscal_year?: string
           id?: string
           notes?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -786,6 +804,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_approve_council: { Args: { _council_id: string }; Returns: boolean }
       can_manage_council: { Args: { _council_id: string }; Returns: boolean }
       claim_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
@@ -806,6 +825,7 @@ export type Database = {
         | "CASHIER"
         | "AUDITOR"
         | "COUNCIL_ADMIN"
+        | "MAYOR"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -939,6 +959,7 @@ export const Constants = {
         "CASHIER",
         "AUDITOR",
         "COUNCIL_ADMIN",
+        "MAYOR",
       ],
     },
   },

@@ -21,6 +21,9 @@ import {
   useCouncilMeetings,
   useCouncilSpending,
   useGovernanceMutation,
+  useBudgetApproval,
+  useCanApproveCouncil,
+  BUDGET_STATUS_LABEL,
 } from "@/lib/governance";
 import { CouncilDocuments } from "@/components/eosr/CouncilDocuments";
 
@@ -56,20 +59,24 @@ function CouncilPage() {
   const spending = useCouncilSpending(councilId);
   const meetings = useCouncilMeetings(councilId);
   const canManage = useCanManageCouncil(councilId);
+  const canApprove = useCanApproveCouncil(councilId);
+  const approval = useBudgetApproval();
 
   const addBudget = useGovernanceMutation("council_budgets");
   const addSpending = useGovernanceMutation("council_spending");
   const addMeeting = useGovernanceMutation("council_meetings");
 
   const totals = useMemo(() => {
-    const allocated = (budgets.data ?? []).reduce((s, b) => s + Number(b.allocated_amount), 0);
+    const allocated = (budgets.data ?? [])
+      .filter((b) => b.approval_status === "APPROVED")
+      .reduce((s, b) => s + Number(b.allocated_amount), 0);
     const spent = (spending.data ?? []).reduce((s, r) => s + Number(r.amount), 0);
     return { allocated, spent, balance: allocated - spent };
   }, [budgets.data, spending.data]);
 
   const perCategory = useMemo(() => {
     const map = new Map<string, { allocated: number; spent: number }>();
-    for (const b of budgets.data ?? [])
+    for (const b of (budgets.data ?? []).filter((x) => x.approval_status === "APPROVED"))
       map.set(b.category, {
         allocated: Number(b.allocated_amount),
         spent: map.get(b.category)?.spent ?? 0,
@@ -83,6 +90,33 @@ function CouncilPage() {
 
   const upcoming = (meetings.data ?? []).filter((m) => new Date(m.meeting_at) >= new Date());
   const editable = canManage.data === true;
+  const approver = canApprove.data === true;
+  const pendingCount = (budgets.data ?? []).filter((b) => b.approval_status === "SUBMITTED").length;
+
+  function act(id: string, action: "SUBMIT" | "APPROVE" | "RETURN" | "REOPEN") {
+    let note: string | undefined;
+    if (action === "RETURN") {
+      const reason = window.prompt("Reason for returning this budget line to the council?");
+      if (reason === null) return;
+      note = reason.trim() || undefined;
+    }
+    approval.mutate(
+      { id, action, ...(note ? { note } : {}) },
+      {
+        onSuccess: () =>
+          toast.success(
+            action === "SUBMIT"
+              ? "Budget line submitted to the mayor"
+              : action === "APPROVE"
+                ? "Budget line approved"
+                : action === "RETURN"
+                  ? "Budget line returned for revision"
+                  : "Budget line reopened as draft",
+          ),
+        onError: (err) => toast.error(err.message),
+      },
+    );
+  }
 
   if (!council) {
     return <EmptyRow>Select a council from the switcher to view its profile.</EmptyRow>;
@@ -131,11 +165,11 @@ function CouncilPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <Panel title="Budget vs spending by category" meta="ALLOCATION UTILISATION">
+        <Panel title="Budget vs spending by category" meta="APPROVED ALLOCATIONS ONLY">
           {budgets.isLoading ? (
             <LoadingRow />
           ) : perCategory.length === 0 ? (
-            <EmptyRow>No budget lines captured yet</EmptyRow>
+            <EmptyRow>No approved budget lines yet</EmptyRow>
           ) : (
             <div className="space-y-4">
               {perCategory.map(([cat, v]) => (
@@ -189,6 +223,99 @@ function CouncilPage() {
         </Panel>
       </div>
 
+      <Panel
+        title="Budget approval register"
+        meta={`FY ${FISCAL_YEAR} · ${pendingCount} AWAITING MAYOR`}
+        bodyClassName="p-0"
+        right={
+          <span className="num rounded-sm border border-line px-2 py-1 text-[10px] tracking-wider text-muted-foreground">
+            {approver ? "MAYORAL APPROVAL" : editable ? "SUBMIT ONLY" : "READ ONLY"}
+          </span>
+        }
+      >
+        {budgets.isLoading ? (
+          <LoadingRow />
+        ) : (budgets.data ?? []).length === 0 ? (
+          <EmptyRow>No budget lines captured yet</EmptyRow>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-[12px]">
+              <thead className="label-mono border-b border-line">
+                <tr>
+                  {["Category", "Allocated (UGX)", "Status", "Submitted", "Reviewed", "Action"].map((h) => (
+                    <th key={h} className="px-4 py-2 font-normal">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(budgets.data ?? []).map((b) => (
+                  <tr key={b.id} className="border-b border-line/60 last:border-0 align-top">
+                    <td className="px-4 py-2.5">
+                      {b.category}
+                      {b.review_note && (
+                        <div className="mt-1 text-[11px] text-destructive">Mayor: {b.review_note}</div>
+                      )}
+                    </td>
+                    <td className="num px-4 py-2.5">{ugx(b.allocated_amount)}</td>
+                    <td className="px-4 py-2.5">
+                      <Pill value={b.approval_status} />
+                      <div className="mt-1 text-[10px] text-muted-foreground">
+                        {BUDGET_STATUS_LABEL[b.approval_status]}
+                      </div>
+                    </td>
+                    <td className="num px-4 py-2.5 text-muted-foreground">{shortDate(b.submitted_at)}</td>
+                    <td className="num px-4 py-2.5 text-muted-foreground">{shortDate(b.reviewed_at)}</td>
+                    <td className="px-4 py-2.5">
+                      <div className="flex flex-wrap gap-1.5">
+                        {editable && !approver && (b.approval_status === "DRAFT" || b.approval_status === "RETURNED") && (
+                          <button
+                            className={buttonClass}
+                            disabled={approval.isPending}
+                            onClick={() => act(b.id, "SUBMIT")}
+                          >
+                            SUBMIT FOR APPROVAL
+                          </button>
+                        )}
+                        {approver && b.approval_status === "SUBMITTED" && (
+                          <>
+                            <button
+                              className={buttonClass}
+                              disabled={approval.isPending}
+                              onClick={() => act(b.id, "APPROVE")}
+                            >
+                              APPROVE
+                            </button>
+                            <button
+                              className={buttonClass}
+                              disabled={approval.isPending}
+                              onClick={() => act(b.id, "RETURN")}
+                            >
+                              RETURN
+                            </button>
+                          </>
+                        )}
+                        {approver && b.approval_status !== "SUBMITTED" && b.approval_status !== "DRAFT" && (
+                          <button
+                            className={buttonClass}
+                            disabled={approval.isPending}
+                            onClick={() => act(b.id, "REOPEN")}
+                          >
+                            REOPEN
+                          </button>
+                        )}
+                        {!editable && !approver && <span className="text-muted-foreground">—</span>}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Panel>
+
       <Panel title="Expenditure ledger" meta="RECORDED SPENDING" bodyClassName="p-0">
         {spending.isLoading ? (
           <LoadingRow />
@@ -232,7 +359,7 @@ function CouncilPage() {
 
       {editable ? (
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-          <Panel title="Submit budget line" meta="COUNCIL SUBMISSION">
+          <Panel title="Submit budget line" meta="COUNCIL SUBMISSION · DRAFT → MAYOR">
             <form
               className="space-y-3"
               onSubmit={(e) => {
@@ -245,9 +372,10 @@ function CouncilPage() {
                     category: String(f.get("category")),
                     allocated_amount: Number(f.get("allocated_amount") || 0),
                     notes: String(f.get("notes") || "") || null,
+                    approval_status: "DRAFT",
                   },
                   {
-                    onSuccess: () => toast.success("Budget line submitted"),
+                    onSuccess: () => toast.success("Budget line saved as draft — submit it for mayoral approval"),
                     onError: (err) => toast.error(err.message),
                   },
                 );
@@ -267,7 +395,7 @@ function CouncilPage() {
                 <input name="notes" className={inputClass} placeholder="Optional" />
               </Field>
               <button type="submit" disabled={addBudget.isPending} className={buttonClass}>
-                SUBMIT BUDGET
+                SAVE BUDGET DRAFT
               </button>
             </form>
           </Panel>

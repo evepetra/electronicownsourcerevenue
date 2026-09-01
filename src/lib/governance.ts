@@ -10,6 +10,21 @@ export type CouncilBudget = {
   allocated_amount: number;
   notes: string | null;
   created_at: string;
+  approval_status: BudgetStatus;
+  submitted_at: string | null;
+  submitted_by: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  review_note: string | null;
+};
+
+export const BUDGET_STATUSES = ["DRAFT", "SUBMITTED", "APPROVED", "RETURNED"] as const;
+export type BudgetStatus = (typeof BUDGET_STATUSES)[number];
+export const BUDGET_STATUS_LABEL: Record<BudgetStatus, string> = {
+  DRAFT: "Draft",
+  SUBMITTED: "Awaiting mayor",
+  APPROVED: "Approved by mayor",
+  RETURNED: "Returned for revision",
 };
 
 export type CouncilSpending = {
@@ -98,6 +113,50 @@ export function useCanManageCouncil(councilId: string | null) {
       });
       if (error) throw new Error(error.message);
       return Boolean(data);
+    },
+  });
+}
+
+/** Server-side check: may the signed-in staff member approve this council's budget (mayor / system admin)? */
+export function useCanApproveCouncil(councilId: string | null) {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["can_approve_council", councilId, user?.id ?? "anon"],
+    enabled: !!councilId && !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("can_approve_council", {
+        _council_id: councilId!,
+      });
+      if (error) throw new Error(error.message);
+      return Boolean(data);
+    },
+  });
+}
+
+/** Budget approval workflow: council admin submits, mayor approves or returns. */
+export function useBudgetApproval() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: async (input: { id: string; action: "SUBMIT" | "APPROVE" | "RETURN" | "REOPEN"; note?: string }) => {
+      const now = new Date().toISOString();
+      const patch: Record<string, unknown> =
+        input.action === "SUBMIT"
+          ? { approval_status: "SUBMITTED", submitted_at: now, submitted_by: user?.id ?? null, review_note: null }
+          : input.action === "REOPEN"
+            ? { approval_status: "DRAFT", submitted_at: null, submitted_by: null }
+            : {
+                approval_status: input.action === "APPROVE" ? "APPROVED" : "RETURNED",
+                reviewed_at: now,
+                reviewed_by: user?.id ?? null,
+                review_note: input.note ?? null,
+              };
+      const { error } = await supabase.from("council_budgets").update(patch as never).eq("id", input.id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["council_budgets"] });
+      void qc.invalidateQueries({ queryKey: ["governance_all"] });
     },
   });
 }

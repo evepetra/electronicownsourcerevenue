@@ -36,7 +36,7 @@ export const createStaffAccount = createServerFn({ method: "POST" })
         fullName: z.string().min(1),
         staffId: z.string().min(1),
         councilId: z.string().uuid().nullable(),
-        role: z.enum(["ADMIN", "COUNCIL_ADMIN", "REVENUE_OFFICER", "CASHIER", "AUDITOR"]),
+        role: z.enum(["ADMIN", "COUNCIL_ADMIN", "MAYOR", "REVENUE_OFFICER", "CASHIER", "AUDITOR"]),
       })
       .parse(input),
   )
