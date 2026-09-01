@@ -221,6 +221,15 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="num hidden text-[11px] lg:inline">{now}</span>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggle}
+              title="Toggle light / dark theme"
+              className="num flex items-center gap-2 rounded-md border border-line bg-panel px-2.5 py-1.5 text-[10px] tracking-wider text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {theme === "dark" ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
+              {theme === "dark" ? "LIGHT" : "DARK"}
+            </button>
             <span className="flex items-center gap-2 rounded-md border border-line bg-panel px-2.5 py-1.5">
               <span className="size-1.5 rounded-full bg-civic" />
               <span className="num text-[10px] tracking-wider text-muted-foreground">FEED · LIVE</span>
