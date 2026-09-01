@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth";
 import { CouncilProvider } from "@/lib/council";
+import { ThemeProvider } from "@/lib/theme";
 
 function NotFoundComponent() {
   return (
