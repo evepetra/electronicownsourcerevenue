@@ -14,8 +14,9 @@ type CouncilState = {
 const CouncilContext = createContext<CouncilState | null>(null);
 
 export function useCouncils() {
+  const { user } = useAuth();
   return useQuery({
-    queryKey: ["councils"],
+    queryKey: ["councils", user?.id ?? "anon"],
     queryFn: async () => {
       const { data, error } = await supabase.from("councils").select("*").order("name");
       if (error) throw error;
