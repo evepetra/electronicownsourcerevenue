@@ -300,7 +300,7 @@ function AdminPage() {
             const f = new FormData(el);
             void (async () => {
               try {
-                await createStaff({
+                const res = await createStaff({
                   data: {
                     email: String(f.get("email")),
                     password: String(f.get("password")),
@@ -310,6 +310,10 @@ function AdminPage() {
                     role: String(f.get("role")) as Role,
                   },
                 });
+                if (!res.ok) {
+                  toast.error(res.error ?? "Could not create account");
+                  return;
+                }
                 toast.success("Staff account created");
                 el.reset();
                 void qc.invalidateQueries({ queryKey: ["staff"] });
