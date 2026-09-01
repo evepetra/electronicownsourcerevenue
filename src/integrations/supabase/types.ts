@@ -136,27 +136,183 @@ export type Database = {
         }
         Relationships: []
       }
+      council_budgets: {
+        Row: {
+          allocated_amount: number
+          category: string
+          council_id: string
+          created_at: string
+          fiscal_year: string
+          id: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          allocated_amount?: number
+          category: string
+          council_id: string
+          created_at?: string
+          fiscal_year: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          allocated_amount?: number
+          category?: string
+          council_id?: string
+          created_at?: string
+          fiscal_year?: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "council_budgets_council_id_fkey"
+            columns: ["council_id"]
+            isOneToOne: false
+            referencedRelation: "councils"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      council_meetings: {
+        Row: {
+          agenda: string | null
+          council_id: string
+          created_at: string
+          id: string
+          location: string
+          meeting_at: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agenda?: string | null
+          council_id: string
+          created_at?: string
+          id?: string
+          location?: string
+          meeting_at: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agenda?: string | null
+          council_id?: string
+          created_at?: string
+          id?: string
+          location?: string
+          meeting_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "council_meetings_council_id_fkey"
+            columns: ["council_id"]
+            isOneToOne: false
+            referencedRelation: "councils"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      council_spending: {
+        Row: {
+          amount: number
+          category: string
+          council_id: string
+          created_at: string
+          department: string | null
+          description: string
+          fiscal_year: string
+          id: string
+          spent_on: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          category: string
+          council_id: string
+          created_at?: string
+          department?: string | null
+          description?: string
+          fiscal_year: string
+          id?: string
+          spent_on?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          council_id?: string
+          created_at?: string
+          department?: string | null
+          description?: string
+          fiscal_year?: string
+          id?: string
+          spent_on?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "council_spending_council_id_fkey"
+            columns: ["council_id"]
+            isOneToOne: false
+            referencedRelation: "councils"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       councils: {
         Row: {
           code: string
           created_at: string
           district: string
+          email: string
           id: string
+          mayor: string | null
           name: string
+          phone: string
+          physical_address: string
+          postal_address: string | null
+          town_clerk: string | null
+          updated_at: string
+          website: string | null
         }
         Insert: {
           code: string
           created_at?: string
           district: string
+          email?: string
           id?: string
+          mayor?: string | null
           name: string
+          phone?: string
+          physical_address?: string
+          postal_address?: string | null
+          town_clerk?: string | null
+          updated_at?: string
+          website?: string | null
         }
         Update: {
           code?: string
           created_at?: string
           district?: string
+          email?: string
           id?: string
+          mayor?: string | null
           name?: string
+          phone?: string
+          physical_address?: string
+          postal_address?: string | null
+          town_clerk?: string | null
+          updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }
@@ -574,6 +730,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_council: { Args: { _council_id: string }; Returns: boolean }
       claim_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -587,7 +744,12 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "ADMIN" | "REVENUE_OFFICER" | "CASHIER" | "AUDITOR"
+      app_role:
+        | "ADMIN"
+        | "REVENUE_OFFICER"
+        | "CASHIER"
+        | "AUDITOR"
+        | "COUNCIL_ADMIN"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -715,7 +877,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["ADMIN", "REVENUE_OFFICER", "CASHIER", "AUDITOR"],
+      app_role: [
+        "ADMIN",
+        "REVENUE_OFFICER",
+        "CASHIER",
+        "AUDITOR",
+        "COUNCIL_ADMIN",
+      ],
     },
   },
 } as const

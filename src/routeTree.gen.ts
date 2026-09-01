@@ -16,6 +16,7 @@ import { Route as AppAdminRouteImport } from './routes/_app.admin'
 import { Route as AppArrearsRouteImport } from './routes/_app.arrears'
 import { Route as AppAuditRouteImport } from './routes/_app.audit'
 import { Route as AppBillingRouteImport } from './routes/_app.billing'
+import { Route as AppCouncilRouteImport } from './routes/_app.council'
 import { Route as AppPaymentsRouteImport } from './routes/_app.payments'
 import { Route as AppReceiptsRouteImport } from './routes/_app.receipts'
 import { Route as AppReconciliationRouteImport } from './routes/_app.reconciliation'
@@ -56,6 +57,11 @@ const AppBillingRoute = AppBillingRouteImport.update({
   path: '/billing',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCouncilRoute = AppCouncilRouteImport.update({
+  id: '/council',
+  path: '/council',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPaymentsRoute = AppPaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/arrears': typeof AppArrearsRoute
   '/audit': typeof AppAuditRoute
   '/billing': typeof AppBillingRoute
+  '/council': typeof AppCouncilRoute
   '/payments': typeof AppPaymentsRoute
   '/receipts': typeof AppReceiptsRoute
   '/reconciliation': typeof AppReconciliationRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/arrears': typeof AppArrearsRoute
   '/audit': typeof AppAuditRoute
   '/billing': typeof AppBillingRoute
+  '/council': typeof AppCouncilRoute
   '/payments': typeof AppPaymentsRoute
   '/receipts': typeof AppReceiptsRoute
   '/reconciliation': typeof AppReconciliationRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/_app/arrears': typeof AppArrearsRoute
   '/_app/audit': typeof AppAuditRoute
   '/_app/billing': typeof AppBillingRoute
+  '/_app/council': typeof AppCouncilRoute
   '/_app/payments': typeof AppPaymentsRoute
   '/_app/receipts': typeof AppReceiptsRoute
   '/_app/reconciliation': typeof AppReconciliationRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/arrears'
     | '/audit'
     | '/billing'
+    | '/council'
     | '/payments'
     | '/receipts'
     | '/reconciliation'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/arrears'
     | '/audit'
     | '/billing'
+    | '/council'
     | '/payments'
     | '/receipts'
     | '/reconciliation'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/_app/arrears'
     | '/_app/audit'
     | '/_app/billing'
+    | '/_app/council'
     | '/_app/payments'
     | '/_app/receipts'
     | '/_app/reconciliation'
@@ -222,6 +234,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBillingRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/council': {
+      id: '/_app/council'
+      path: '/council'
+      fullPath: '/council'
+      preLoaderRoute: typeof AppCouncilRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/payments': {
       id: '/_app/payments'
       path: '/payments'
@@ -265,6 +284,7 @@ interface AppRouteChildren {
   AppArrearsRoute: typeof AppArrearsRoute
   AppAuditRoute: typeof AppAuditRoute
   AppBillingRoute: typeof AppBillingRoute
+  AppCouncilRoute: typeof AppCouncilRoute
   AppPaymentsRoute: typeof AppPaymentsRoute
   AppReceiptsRoute: typeof AppReceiptsRoute
   AppReconciliationRoute: typeof AppReconciliationRoute
@@ -278,6 +298,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppArrearsRoute: AppArrearsRoute,
   AppAuditRoute: AppAuditRoute,
   AppBillingRoute: AppBillingRoute,
+  AppCouncilRoute: AppCouncilRoute,
   AppPaymentsRoute: AppPaymentsRoute,
   AppReceiptsRoute: AppReceiptsRoute,
   AppReconciliationRoute: AppReconciliationRoute,
