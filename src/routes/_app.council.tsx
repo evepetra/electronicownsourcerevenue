@@ -123,9 +123,7 @@ function CouncilPage() {
           value={compactUgx(totals.spent)}
           tone="warn"
           delta={
-            totals.allocated
-              ? `${((totals.spent / totals.allocated) * 100).toFixed(1)}% USED`
-              : undefined
+            totals.allocated ? `${((totals.spent / totals.allocated) * 100).toFixed(1)}% USED` : "0% USED"
           }
         />
         <Kpi label="UNSPENT BALANCE" value={compactUgx(totals.balance)} note="AVAILABLE" />
