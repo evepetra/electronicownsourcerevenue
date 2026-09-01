@@ -17,6 +17,12 @@ import {
   Pill,
 } from "@/components/eosr/ui";
 import { REVENUE_SOURCES, ROLES, ugx, type Role } from "@/lib/eosr";
+import { useServerFn } from "@tanstack/react-start";
+import {
+  createStaffAccount,
+  deleteStaffAccount,
+  resetStaffPassword,
+} from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_app/admin")({
   head: () => ({
@@ -42,6 +48,45 @@ function AdminPage() {
   const { profile } = useAuth();
   const qc = useQueryClient();
   const fees = useFeeSchedules(councilId);
+  const createStaff = useServerFn(createStaffAccount);
+  const resetPassword = useServerFn(resetStaffPassword);
+  const removeStaff = useServerFn(deleteStaffAccount);
+
+  async function handleResetPassword(userId: string, email: string) {
+    const next = window.prompt(`New password for ${email} (minimum 8 characters)`);
+    if (!next) return;
+    try {
+      await resetPassword({ data: { userId, password: next } });
+      await logAudit({
+        actor: profile?.email ?? "system",
+        action: "PASSWORD_RESET",
+        entity: "auth.users",
+        entity_id: userId,
+        details: `Password reset for ${email}`,
+      });
+      toast.success(`Password reset for ${email}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Reset failed");
+    }
+  }
+
+  async function handleRemoveStaff(userId: string, email: string) {
+    if (!window.confirm(`Remove ${email}? This deletes the account permanently.`)) return;
+    try {
+      await removeStaff({ data: { userId } });
+      await logAudit({
+        actor: profile?.email ?? "system",
+        action: "STAFF_REMOVED",
+        entity: "profiles",
+        entity_id: userId,
+        details: `Removed ${email}`,
+      });
+      toast.success(`${email} removed`);
+      void qc.invalidateQueries({ queryKey: ["staff"] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Removal failed");
+    }
+  }
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
     revenue_source: REVENUE_SOURCES[0] as string,
@@ -339,6 +384,24 @@ function AdminPage() {
                           </option>
                         ))}
                       </select>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => void handleResetPassword(s.id, s.email)}
+                          className={ghostButtonClass}
+                        >
+                          RESET PASSWORD
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleRemoveStaff(s.id, s.email)}
+                          className={ghostButtonClass}
+                        >
+                          REMOVE
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
