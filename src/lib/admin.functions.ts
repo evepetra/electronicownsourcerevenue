@@ -22,8 +22,8 @@ export const resetStaffPassword = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
       password: data.password,
     });
-    if (error) throw new Error(error.message);
-    return { ok: true };
+    if (error) return { ok: false as const, error: error.message };
+    return { ok: true as const, error: null };
   });
 
 export const createStaffAccount = createServerFn({ method: "POST" })
@@ -49,7 +49,8 @@ export const createStaffAccount = createServerFn({ method: "POST" })
       email_confirm: true,
       user_metadata: { full_name: data.fullName },
     });
-    if (error || !created.user) throw new Error(error?.message ?? "Could not create account");
+    if (error || !created.user)
+      return { ok: false as const, error: error?.message ?? "Could not create account", userId: null };
 
     const uid = created.user.id;
     await supabaseAdmin.from("profiles").upsert({
@@ -61,7 +62,7 @@ export const createStaffAccount = createServerFn({ method: "POST" })
     });
     await supabaseAdmin.from("user_roles").delete().eq("user_id", uid);
     await supabaseAdmin.from("user_roles").insert({ user_id: uid, role: data.role });
-    return { ok: true, userId: uid };
+    return { ok: true as const, error: null, userId: uid };
   });
 
 export const deleteStaffAccount = createServerFn({ method: "POST" })
