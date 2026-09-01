@@ -17,6 +17,12 @@ import {
   Pill,
 } from "@/components/eosr/ui";
 import { REVENUE_SOURCES, ROLES, ugx, type Role } from "@/lib/eosr";
+import { useServerFn } from "@tanstack/react-start";
+import {
+  createStaffAccount,
+  deleteStaffAccount,
+  resetStaffPassword,
+} from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_app/admin")({
   head: () => ({
@@ -42,6 +48,45 @@ function AdminPage() {
   const { profile } = useAuth();
   const qc = useQueryClient();
   const fees = useFeeSchedules(councilId);
+  const createStaff = useServerFn(createStaffAccount);
+  const resetPassword = useServerFn(resetStaffPassword);
+  const removeStaff = useServerFn(deleteStaffAccount);
+
+  async function handleResetPassword(userId: string, email: string) {
+    const next = window.prompt(`New password for ${email} (minimum 8 characters)`);
+    if (!next) return;
+    try {
+      await resetPassword({ data: { userId, password: next } });
+      await logAudit({
+        actor: profile?.email ?? "system",
+        action: "PASSWORD_RESET",
+        entity: "auth.users",
+        entity_id: userId,
+        details: `Password reset for ${email}`,
+      });
+      toast.success(`Password reset for ${email}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Reset failed");
+    }
+  }
+
+  async function handleRemoveStaff(userId: string, email: string) {
+    if (!window.confirm(`Remove ${email}? This deletes the account permanently.`)) return;
+    try {
+      await removeStaff({ data: { userId } });
+      await logAudit({
+        actor: profile?.email ?? "system",
+        action: "STAFF_REMOVED",
+        entity: "profiles",
+        entity_id: userId,
+        details: `Removed ${email}`,
+      });
+      toast.success(`${email} removed`);
+      void qc.invalidateQueries({ queryKey: ["staff"] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Removal failed");
+    }
+  }
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
     revenue_source: REVENUE_SOURCES[0] as string,
@@ -238,15 +283,82 @@ function AdminPage() {
         )}
       </Panel>
 
+      <Panel title="Create staff account" meta="SYSTEM ADMINISTRATOR ONLY">
+        <form
+          className="grid grid-cols-1 gap-3 md:grid-cols-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const el = e.currentTarget as HTMLFormElement;
+            const f = new FormData(el);
+            void (async () => {
+              try {
+                await createStaff({
+                  data: {
+                    email: String(f.get("email")),
+                    password: String(f.get("password")),
+                    fullName: String(f.get("full_name")),
+                    staffId: String(f.get("staff_id")),
+                    councilId: (String(f.get("council_id")) || null) as string | null,
+                    role: String(f.get("role")) as Role,
+                  },
+                });
+                toast.success("Staff account created");
+                el.reset();
+                void qc.invalidateQueries({ queryKey: ["staff"] });
+              } catch (err) {
+                toast.error(err instanceof Error ? err.message : "Could not create account");
+              }
+            })();
+          }}
+        >
+          <Field label="Work email">
+            <input name="email" type="email" required className={inputClass} />
+          </Field>
+          <Field label="Temporary password">
+            <input name="password" type="text" minLength={8} required className={inputClass} />
+          </Field>
+          <Field label="Full name">
+            <input name="full_name" required className={inputClass} />
+          </Field>
+          <Field label="Staff ID">
+            <input name="staff_id" required className={inputClass} />
+          </Field>
+          <Field label="Council">
+            <select name="council_id" defaultValue={councilId ?? ""} className={inputClass}>
+              <option value="">— none —</option>
+              {councils.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Role">
+            <select name="role" defaultValue="REVENUE_OFFICER" className={inputClass}>
+              {ROLES.map((r) => (
+                <option key={r} value={r}>
+                  {r.replace(/_/g, " ")}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <div className="md:col-span-3">
+            <button type="submit" className={buttonClass}>
+              CREATE ACCOUNT
+            </button>
+          </div>
+        </form>
+      </Panel>
+
       <Panel title="Staff & roles" meta={`${(staff.data ?? []).length} ACCOUNTS`} bodyClassName="p-0">
         {staff.isLoading ? (
           <LoadingRow />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] text-left">
+            <table className="w-full min-w-[880px] text-left">
               <thead>
                 <tr className="border-b border-line">
-                  {["Staff", "Email", "Staff ID", "Role"].map((h) => (
+                  {["Staff", "Email", "Staff ID", "Role", "Actions"].map((h) => (
                     <th key={h} className="label-mono px-4 py-2 font-normal">
                       {h}
                     </th>
@@ -272,6 +384,24 @@ function AdminPage() {
                           </option>
                         ))}
                       </select>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => void handleResetPassword(s.id, s.email)}
+                          className={ghostButtonClass}
+                        >
+                          RESET PASSWORD
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleRemoveStaff(s.id, s.email)}
+                          className={ghostButtonClass}
+                        >
+                          REMOVE
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
