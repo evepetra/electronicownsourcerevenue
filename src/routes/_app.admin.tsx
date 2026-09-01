@@ -55,8 +55,16 @@ function AdminPage() {
   async function handleResetPassword(userId: string, email: string) {
     const next = window.prompt(`New password for ${email} (minimum 8 characters)`);
     if (!next) return;
+    if (next.trim().length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
     try {
-      await resetPassword({ data: { userId, password: next } });
+      const res = await resetPassword({ data: { userId, password: next.trim() } });
+      if (!res.ok) {
+        toast.error(res.error ?? "Reset failed");
+        return;
+      }
       await logAudit({
         actor: profile?.email ?? "system",
         action: "PASSWORD_RESET",
