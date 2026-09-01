@@ -3,7 +3,19 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
-export type Council = { id: string; name: string; code: string; district: string };
+export type Council = {
+  id: string;
+  name: string;
+  code: string;
+  district: string;
+  physical_address: string;
+  postal_address: string | null;
+  phone: string;
+  email: string;
+  website: string | null;
+  mayor: string | null;
+  town_clerk: string | null;
+};
 
 type CouncilState = {
   councils: Council[];
