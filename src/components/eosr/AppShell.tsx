@@ -47,8 +47,14 @@ export const NAV: NavItem[] = [
     roles: ["ADMIN", "COUNCIL_ADMIN", "MAYOR", "REVENUE_OFFICER", "AUDITOR"],
   },
   { no: "10", label: "Administration", to: "/admin", roles: ["ADMIN"] },
-  { no: "11", label: "Council Profile", to: "/council", roles: ALL },
+  { no: "11", label: "Council Portal", to: "/council", roles: ALL },
   { no: "12", label: "Council Dashboard", to: "/council-dashboard", roles: ALL },
+  {
+    no: "13",
+    label: "Council Performance",
+    to: "/council-performance",
+    roles: ["ADMIN", "MAYOR", "COUNCIL_ADMIN", "AUDITOR"],
+  },
 ];
 
 function initials(name: string) {
