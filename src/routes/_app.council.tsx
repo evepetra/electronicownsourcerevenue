@@ -188,38 +188,83 @@ function CouncilPage() {
           )}
         </Panel>
 
-        <Panel title="Upcoming council meetings" meta={`${upcoming.length} SCHEDULED`}>
+        <Panel
+          title="Council meetings"
+          meta={`${upcoming.length} UPCOMING · ${(meetings.data ?? []).length} TOTAL`}
+        >
           {meetings.isLoading ? (
             <LoadingRow />
-          ) : upcoming.length === 0 ? (
+          ) : (meetings.data ?? []).length === 0 ? (
             <EmptyRow>No meetings scheduled</EmptyRow>
           ) : (
             <ul className="space-y-2">
-              {upcoming.map((m) => (
-                <li key={m.id} className="rounded-sm border border-line bg-panel2 p-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="truncate text-[13px] font-medium">{m.title}</div>
-                      <div className="num mt-1 text-[10px] tracking-wider text-muted-foreground">
-                        {new Date(m.meeting_at)
-                          .toLocaleString("en-GB", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                          .toUpperCase()}{" "}
-                        · {m.location || "—"}
+              {[...(meetings.data ?? [])]
+                .sort((a, b) => b.meeting_at.localeCompare(a.meeting_at))
+                .map((m) => {
+                  const past = new Date(m.meeting_at) < new Date();
+                  return (
+                    <li key={m.id} className="rounded-sm border border-line bg-panel2 p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="truncate text-[13px] font-medium">{m.title}</div>
+                          <div className="num mt-1 text-[10px] tracking-wider text-muted-foreground">
+                            {new Date(m.meeting_at)
+                              .toLocaleString("en-GB", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                              .toUpperCase()}{" "}
+                            · {m.location || "—"}
+                          </div>
+                          {m.agenda && (
+                            <p className="mt-1.5 text-[12px] text-muted-foreground">{m.agenda}</p>
+                          )}
+                          <div className="num mt-1.5 text-[10px] tracking-wider text-muted-foreground">
+                            ATTENDANCE:{" "}
+                            {m.attendees_present === null
+                              ? `NOT RECORDED · ${m.expected_attendees} EXPECTED`
+                              : `${m.attendees_present}/${m.expected_attendees} · ${
+                                  m.expected_attendees
+                                    ? ((m.attendees_present / m.expected_attendees) * 100).toFixed(0)
+                                    : "0"
+                                }%`}
+                          </div>
+                          {editable && past && (
+                            <button
+                              className={`${buttonClass} mt-2`}
+                              disabled={attendance.isPending}
+                              onClick={() => {
+                                const raw = window.prompt(
+                                  `How many members attended "${m.title}"? (expected ${m.expected_attendees})`,
+                                  String(m.attendees_present ?? ""),
+                                );
+                                if (raw === null) return;
+                                const n = Number(raw);
+                                if (!Number.isFinite(n) || n < 0) {
+                                  toast.error("Enter a valid attendance count");
+                                  return;
+                                }
+                                attendance.mutate(
+                                  { id: m.id, attendees_present: n },
+                                  {
+                                    onSuccess: () => toast.success("Attendance recorded"),
+                                    onError: (err) => toast.error(err.message),
+                                  },
+                                );
+                              }}
+                            >
+                              RECORD ATTENDANCE
+                            </button>
+                          )}
+                        </div>
+                        <Pill value={m.status} />
                       </div>
-                      {m.agenda && (
-                        <p className="mt-1.5 text-[12px] text-muted-foreground">{m.agenda}</p>
-                      )}
-                    </div>
-                    <Pill value={m.status} />
-                  </div>
-                </li>
-              ))}
+                    </li>
+                  );
+                })}
             </ul>
           )}
         </Panel>
