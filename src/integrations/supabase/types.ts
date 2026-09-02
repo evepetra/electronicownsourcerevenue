@@ -254,8 +254,10 @@ export type Database = {
       council_meetings: {
         Row: {
           agenda: string | null
+          attendees_present: number | null
           council_id: string
           created_at: string
+          expected_attendees: number
           id: string
           location: string
           meeting_at: string
@@ -265,8 +267,10 @@ export type Database = {
         }
         Insert: {
           agenda?: string | null
+          attendees_present?: number | null
           council_id: string
           created_at?: string
+          expected_attendees?: number
           id?: string
           location?: string
           meeting_at: string
@@ -276,8 +280,10 @@ export type Database = {
         }
         Update: {
           agenda?: string | null
+          attendees_present?: number | null
           council_id?: string
           created_at?: string
+          expected_attendees?: number
           id?: string
           location?: string
           meeting_at?: string
@@ -305,6 +311,7 @@ export type Database = {
           description: string
           fiscal_year: string
           id: string
+          planned_on: string | null
           spent_on: string
           updated_at: string
         }
@@ -317,6 +324,7 @@ export type Database = {
           description?: string
           fiscal_year: string
           id?: string
+          planned_on?: string | null
           spent_on?: string
           updated_at?: string
         }
@@ -329,6 +337,7 @@ export type Database = {
           description?: string
           fiscal_year?: string
           id?: string
+          planned_on?: string | null
           spent_on?: string
           updated_at?: string
         }
