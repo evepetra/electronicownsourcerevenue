@@ -23,6 +23,7 @@ import {
   useGovernanceMutation,
   useBudgetApproval,
   useCanApproveCouncil,
+  useMeetingAttendance,
   BUDGET_STATUS_LABEL,
 } from "@/lib/governance";
 import { CouncilDocuments } from "@/components/eosr/CouncilDocuments";
@@ -61,6 +62,7 @@ function CouncilPage() {
   const canManage = useCanManageCouncil(councilId);
   const canApprove = useCanApproveCouncil(councilId);
   const approval = useBudgetApproval();
+  const attendance = useMeetingAttendance();
 
   const addBudget = useGovernanceMutation("council_budgets");
   const addSpending = useGovernanceMutation("council_spending");
@@ -186,38 +188,83 @@ function CouncilPage() {
           )}
         </Panel>
 
-        <Panel title="Upcoming council meetings" meta={`${upcoming.length} SCHEDULED`}>
+        <Panel
+          title="Council meetings"
+          meta={`${upcoming.length} UPCOMING · ${(meetings.data ?? []).length} TOTAL`}
+        >
           {meetings.isLoading ? (
             <LoadingRow />
-          ) : upcoming.length === 0 ? (
+          ) : (meetings.data ?? []).length === 0 ? (
             <EmptyRow>No meetings scheduled</EmptyRow>
           ) : (
             <ul className="space-y-2">
-              {upcoming.map((m) => (
-                <li key={m.id} className="rounded-sm border border-line bg-panel2 p-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="truncate text-[13px] font-medium">{m.title}</div>
-                      <div className="num mt-1 text-[10px] tracking-wider text-muted-foreground">
-                        {new Date(m.meeting_at)
-                          .toLocaleString("en-GB", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                          .toUpperCase()}{" "}
-                        · {m.location || "—"}
+              {[...(meetings.data ?? [])]
+                .sort((a, b) => b.meeting_at.localeCompare(a.meeting_at))
+                .map((m) => {
+                  const past = new Date(m.meeting_at) < new Date();
+                  return (
+                    <li key={m.id} className="rounded-sm border border-line bg-panel2 p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="truncate text-[13px] font-medium">{m.title}</div>
+                          <div className="num mt-1 text-[10px] tracking-wider text-muted-foreground">
+                            {new Date(m.meeting_at)
+                              .toLocaleString("en-GB", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                              .toUpperCase()}{" "}
+                            · {m.location || "—"}
+                          </div>
+                          {m.agenda && (
+                            <p className="mt-1.5 text-[12px] text-muted-foreground">{m.agenda}</p>
+                          )}
+                          <div className="num mt-1.5 text-[10px] tracking-wider text-muted-foreground">
+                            ATTENDANCE:{" "}
+                            {m.attendees_present === null
+                              ? `NOT RECORDED · ${m.expected_attendees} EXPECTED`
+                              : `${m.attendees_present}/${m.expected_attendees} · ${
+                                  m.expected_attendees
+                                    ? ((m.attendees_present / m.expected_attendees) * 100).toFixed(0)
+                                    : "0"
+                                }%`}
+                          </div>
+                          {editable && past && (
+                            <button
+                              className={`${buttonClass} mt-2`}
+                              disabled={attendance.isPending}
+                              onClick={() => {
+                                const raw = window.prompt(
+                                  `How many members attended "${m.title}"? (expected ${m.expected_attendees})`,
+                                  String(m.attendees_present ?? ""),
+                                );
+                                if (raw === null) return;
+                                const n = Number(raw);
+                                if (!Number.isFinite(n) || n < 0) {
+                                  toast.error("Enter a valid attendance count");
+                                  return;
+                                }
+                                attendance.mutate(
+                                  { id: m.id, attendees_present: n },
+                                  {
+                                    onSuccess: () => toast.success("Attendance recorded"),
+                                    onError: (err) => toast.error(err.message),
+                                  },
+                                );
+                              }}
+                            >
+                              RECORD ATTENDANCE
+                            </button>
+                          )}
+                        </div>
+                        <Pill value={m.status} />
                       </div>
-                      {m.agenda && (
-                        <p className="mt-1.5 text-[12px] text-muted-foreground">{m.agenda}</p>
-                      )}
-                    </div>
-                    <Pill value={m.status} />
-                  </div>
-                </li>
-              ))}
+                    </li>
+                  );
+                })}
             </ul>
           )}
         </Panel>
@@ -326,7 +373,7 @@ function CouncilPage() {
             <table className="w-full text-left text-[12px]">
               <thead className="label-mono border-b border-line">
                 <tr>
-                  {["Date", "Category", "Description", "Department", "Amount (UGX)"].map((h) => (
+                  {["Date paid", "Planned", "Category", "Description", "Department", "Amount (UGX)"].map((h) => (
                     <th key={h} className="px-4 py-2 font-normal">
                       {h}
                     </th>
@@ -337,6 +384,18 @@ function CouncilPage() {
                 {(spending.data ?? []).map((s) => (
                   <tr key={s.id} className="border-b border-line/60 last:border-0">
                     <td className="num px-4 py-2.5">{shortDate(s.spent_on)}</td>
+                    <td className="num px-4 py-2.5 text-muted-foreground">
+                      {s.planned_on ? (
+                        <>
+                          {shortDate(s.planned_on)}{" "}
+                          <span className={s.spent_on <= s.planned_on ? "text-civic" : "text-destructive"}>
+                            {s.spent_on <= s.planned_on ? "· ON TIME" : "· LATE"}
+                          </span>
+                        </>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
                     <td className="px-4 py-2.5">{s.category}</td>
                     <td className="px-4 py-2.5 text-muted-foreground">{s.description}</td>
                     <td className="num px-4 py-2.5 text-muted-foreground">{s.department ?? "—"}</td>
@@ -414,6 +473,7 @@ function CouncilPage() {
                     description: String(f.get("description") || ""),
                     amount: Number(f.get("amount") || 0),
                     spent_on: String(f.get("spent_on")),
+                    planned_on: String(f.get("planned_on") || "") || null,
                     department: String(f.get("department") || "") || null,
                   },
                   {
@@ -434,7 +494,15 @@ function CouncilPage() {
                 <input name="amount" type="number" min="0" required className={inputClass} />
               </Field>
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Date">
+                <Field label="Planned date">
+                  <input
+                    name="planned_on"
+                    type="date"
+                    defaultValue={new Date().toISOString().slice(0, 10)}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field label="Date paid">
                   <input
                     name="spent_on"
                     type="date"
@@ -443,6 +511,8 @@ function CouncilPage() {
                     className={inputClass}
                   />
                 </Field>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
                 <Field label="Department">
                   <input name="department" className={inputClass} placeholder="Works" />
                 </Field>
@@ -467,6 +537,7 @@ function CouncilPage() {
                     agenda: String(f.get("agenda") || "") || null,
                     meeting_at: new Date(String(f.get("meeting_at"))).toISOString(),
                     location: String(f.get("location") || ""),
+                    expected_attendees: Number(f.get("expected_attendees") || 0),
                     status: "SCHEDULED",
                   },
                   {
@@ -483,9 +554,14 @@ function CouncilPage() {
               <Field label="Date & time">
                 <input name="meeting_at" type="datetime-local" required className={inputClass} />
               </Field>
-              <Field label="Location">
-                <input name="location" className={inputClass} placeholder="Council Boardroom" />
-              </Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Location">
+                  <input name="location" className={inputClass} placeholder="Council Boardroom" />
+                </Field>
+                <Field label="Expected attendees">
+                  <input name="expected_attendees" type="number" min="0" defaultValue={0} className={inputClass} />
+                </Field>
+              </div>
               <Field label="Agenda">
                 <input name="agenda" className={inputClass} placeholder="Optional" />
               </Field>

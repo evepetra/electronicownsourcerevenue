@@ -35,6 +35,7 @@ export type CouncilSpending = {
   description: string;
   amount: number;
   spent_on: string;
+  planned_on: string | null;
   department: string | null;
   created_at: string;
 };
@@ -47,6 +48,8 @@ export type CouncilMeeting = {
   meeting_at: string;
   location: string;
   status: string;
+  expected_attendees: number;
+  attendees_present: number | null;
   created_at: string;
 };
 
@@ -156,6 +159,26 @@ export function useBudgetApproval() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["council_budgets"] });
+      void qc.invalidateQueries({ queryKey: ["governance_all"] });
+    },
+  });
+}
+
+/** Council admins record how many members actually attended a held meeting. */
+export function useMeetingAttendance() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { id: string; attendees_present: number; expected_attendees?: number }) => {
+      const patch: Record<string, unknown> = {
+        attendees_present: input.attendees_present,
+        status: "HELD",
+      };
+      if (typeof input.expected_attendees === "number") patch['expected_attendees'] = input.expected_attendees;
+      const { error } = await supabase.from("council_meetings").update(patch as never).eq("id", input.id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["council_meetings"] });
       void qc.invalidateQueries({ queryKey: ["governance_all"] });
     },
   });

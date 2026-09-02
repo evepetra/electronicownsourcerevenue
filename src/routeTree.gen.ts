@@ -18,6 +18,7 @@ import { Route as AppAuditRouteImport } from './routes/_app.audit'
 import { Route as AppBillingRouteImport } from './routes/_app.billing'
 import { Route as AppCouncilRouteImport } from './routes/_app.council'
 import { Route as AppCouncilDashboardRouteImport } from './routes/_app.council-dashboard'
+import { Route as AppCouncilPerformanceRouteImport } from './routes/_app.council-performance'
 import { Route as AppPaymentsRouteImport } from './routes/_app.payments'
 import { Route as AppReceiptsRouteImport } from './routes/_app.receipts'
 import { Route as AppReconciliationRouteImport } from './routes/_app.reconciliation'
@@ -68,6 +69,11 @@ const AppCouncilDashboardRoute = AppCouncilDashboardRouteImport.update({
   path: '/council-dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCouncilPerformanceRoute = AppCouncilPerformanceRouteImport.update({
+  id: '/council-performance',
+  path: '/council-performance',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPaymentsRoute = AppPaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/billing': typeof AppBillingRoute
   '/council': typeof AppCouncilRoute
   '/council-dashboard': typeof AppCouncilDashboardRoute
+  '/council-performance': typeof AppCouncilPerformanceRoute
   '/payments': typeof AppPaymentsRoute
   '/receipts': typeof AppReceiptsRoute
   '/reconciliation': typeof AppReconciliationRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/billing': typeof AppBillingRoute
   '/council': typeof AppCouncilRoute
   '/council-dashboard': typeof AppCouncilDashboardRoute
+  '/council-performance': typeof AppCouncilPerformanceRoute
   '/payments': typeof AppPaymentsRoute
   '/receipts': typeof AppReceiptsRoute
   '/reconciliation': typeof AppReconciliationRoute
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/_app/billing': typeof AppBillingRoute
   '/_app/council': typeof AppCouncilRoute
   '/_app/council-dashboard': typeof AppCouncilDashboardRoute
+  '/_app/council-performance': typeof AppCouncilPerformanceRoute
   '/_app/payments': typeof AppPaymentsRoute
   '/_app/receipts': typeof AppReceiptsRoute
   '/_app/reconciliation': typeof AppReconciliationRoute
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/council'
     | '/council-dashboard'
+    | '/council-performance'
     | '/payments'
     | '/receipts'
     | '/reconciliation'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/council'
     | '/council-dashboard'
+    | '/council-performance'
     | '/payments'
     | '/receipts'
     | '/reconciliation'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/_app/billing'
     | '/_app/council'
     | '/_app/council-dashboard'
+    | '/_app/council-performance'
     | '/_app/payments'
     | '/_app/receipts'
     | '/_app/reconciliation'
@@ -260,6 +272,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCouncilDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/council-performance': {
+      id: '/_app/council-performance'
+      path: '/council-performance'
+      fullPath: '/council-performance'
+      preLoaderRoute: typeof AppCouncilPerformanceRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/payments': {
       id: '/_app/payments'
       path: '/payments'
@@ -305,6 +324,7 @@ interface AppRouteChildren {
   AppBillingRoute: typeof AppBillingRoute
   AppCouncilRoute: typeof AppCouncilRoute
   AppCouncilDashboardRoute: typeof AppCouncilDashboardRoute
+  AppCouncilPerformanceRoute: typeof AppCouncilPerformanceRoute
   AppPaymentsRoute: typeof AppPaymentsRoute
   AppReceiptsRoute: typeof AppReceiptsRoute
   AppReconciliationRoute: typeof AppReconciliationRoute
@@ -320,6 +340,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppBillingRoute: AppBillingRoute,
   AppCouncilRoute: AppCouncilRoute,
   AppCouncilDashboardRoute: AppCouncilDashboardRoute,
+  AppCouncilPerformanceRoute: AppCouncilPerformanceRoute,
   AppPaymentsRoute: AppPaymentsRoute,
   AppReceiptsRoute: AppReceiptsRoute,
   AppReconciliationRoute: AppReconciliationRoute,
