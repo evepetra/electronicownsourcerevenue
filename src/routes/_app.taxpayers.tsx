@@ -176,6 +176,23 @@ function TaxpayersPage() {
                 className={inputClass}
               />
             </Field>
+            <Field label="Council">
+              <select
+                required
+                value={formCouncilId}
+                onChange={(e) => setFormCouncilId(e.target.value)}
+                className={inputClass}
+              >
+                <option value="" disabled>
+                  Select council…
+                </option>
+                {councils.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
             <Field label="Type">
               <select
                 value={form.type}
