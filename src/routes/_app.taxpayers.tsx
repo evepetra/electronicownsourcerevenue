@@ -40,7 +40,7 @@ export const Route = createFileRoute("/_app/taxpayers")({
 const TYPES = ["BUSINESS", "INDIVIDUAL", "MARKET_VENDOR", "PROPERTY_OWNER"];
 
 function TaxpayersPage() {
-  const { councilId, council } = useCouncil();
+  const { councilId, council, councils } = useCouncil();
   const { profile, user } = useAuth();
   const qc = useQueryClient();
   const taxpayers = useTaxpayers(councilId);
@@ -48,6 +48,13 @@ function TaxpayersPage() {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [formCouncilId, setFormCouncilId] = useState<string>("");
+
+  useEffect(() => {
+    if (councilId && !formCouncilId) setFormCouncilId(councilId);
+  }, [councilId, formCouncilId]);
+
+  const formCouncil = councils.find((c) => c.id === formCouncilId) ?? council;
   const [form, setForm] = useState({
     name: "",
     type: "BUSINESS",
