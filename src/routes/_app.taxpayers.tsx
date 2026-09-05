@@ -101,7 +101,7 @@ function TaxpayersPage() {
         nin: form.nin || null,
         location: form.location || null,
         address: form.address || null,
-        council_id: councilId,
+        council_id: formCouncilId,
       });
       if (error) throw error;
       await logAudit({
@@ -109,7 +109,7 @@ function TaxpayersPage() {
         action: "TAXPAYER_REGISTERED",
         entity: "taxpayers",
         entity_id: code,
-        details: `${form.name} registered in ${council?.name}`,
+        details: `${form.name} registered in ${formCouncil?.name ?? "council"}`,
       });
       toast.success(`Taxpayer ${code} registered`);
       setForm({
