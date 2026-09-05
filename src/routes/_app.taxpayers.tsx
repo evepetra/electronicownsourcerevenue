@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/_app/taxpayers")({
 const TYPES = ["BUSINESS", "INDIVIDUAL", "MARKET_VENDOR", "PROPERTY_OWNER"];
 
 function TaxpayersPage() {
-  const { councilId, council } = useCouncil();
+  const { councilId, council, councils } = useCouncil();
   const { profile, user } = useAuth();
   const qc = useQueryClient();
   const taxpayers = useTaxpayers(councilId);
@@ -48,6 +48,13 @@ function TaxpayersPage() {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [formCouncilId, setFormCouncilId] = useState<string>("");
+
+  useEffect(() => {
+    if (councilId && !formCouncilId) setFormCouncilId(councilId);
+  }, [councilId, formCouncilId]);
+
+  const formCouncil = councils.find((c) => c.id === formCouncilId) ?? council;
   const [form, setForm] = useState({
     name: "",
     type: "BUSINESS",
@@ -79,11 +86,11 @@ function TaxpayersPage() {
 
   async function createTaxpayer(e: React.FormEvent) {
     e.preventDefault();
-    if (!councilId) return;
+    if (!formCouncilId) return;
     setBusy(true);
     try {
       const seq = (taxpayers.data?.length ?? 0) + 1;
-      const code = `${council?.code ?? "OSR"}-TP-${String(seq).padStart(4, "0")}-${Math.floor(Math.random() * 90 + 10)}`;
+      const code = `${formCouncil?.code ?? "OSR"}-TP-${String(seq).padStart(4, "0")}-${Math.floor(Math.random() * 90 + 10)}`;
       const { error } = await supabase.from("taxpayers").insert({
         taxpayer_code: code,
         name: form.name,
@@ -94,7 +101,7 @@ function TaxpayersPage() {
         nin: form.nin || null,
         location: form.location || null,
         address: form.address || null,
-        council_id: councilId,
+        council_id: formCouncilId,
       });
       if (error) throw error;
       await logAudit({
@@ -102,7 +109,7 @@ function TaxpayersPage() {
         action: "TAXPAYER_REGISTERED",
         entity: "taxpayers",
         entity_id: code,
-        details: `${form.name} registered in ${council?.name}`,
+        details: `${form.name} registered in ${formCouncil?.name ?? "council"}`,
       });
       toast.success(`Taxpayer ${code} registered`);
       setForm({
@@ -168,6 +175,23 @@ function TaxpayersPage() {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className={inputClass}
               />
+            </Field>
+            <Field label="Council">
+              <select
+                required
+                value={formCouncilId}
+                onChange={(e) => setFormCouncilId(e.target.value)}
+                className={inputClass}
+              >
+                <option value="" disabled>
+                  Select council…
+                </option>
+                {councils.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
             </Field>
             <Field label="Type">
               <select
