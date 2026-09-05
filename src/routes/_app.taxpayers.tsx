@@ -86,11 +86,11 @@ function TaxpayersPage() {
 
   async function createTaxpayer(e: React.FormEvent) {
     e.preventDefault();
-    if (!councilId) return;
+    if (!formCouncilId) return;
     setBusy(true);
     try {
       const seq = (taxpayers.data?.length ?? 0) + 1;
-      const code = `${council?.code ?? "OSR"}-TP-${String(seq).padStart(4, "0")}-${Math.floor(Math.random() * 90 + 10)}`;
+      const code = `${formCouncil?.code ?? "OSR"}-TP-${String(seq).padStart(4, "0")}-${Math.floor(Math.random() * 90 + 10)}`;
       const { error } = await supabase.from("taxpayers").insert({
         taxpayer_code: code,
         name: form.name,
