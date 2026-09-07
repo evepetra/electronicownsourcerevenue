@@ -494,6 +494,68 @@ export type Database = {
           },
         ]
       }
+      momo_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          external_id: string
+          financial_transaction_id: string | null
+          id: string
+          invoice_no: string
+          mode: string
+          msisdn: string
+          payment_id: string | null
+          provider: string
+          reason: string | null
+          reference_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          external_id: string
+          financial_transaction_id?: string | null
+          id?: string
+          invoice_no: string
+          mode?: string
+          msisdn: string
+          payment_id?: string | null
+          provider?: string
+          reason?: string | null
+          reference_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          external_id?: string
+          financial_transaction_id?: string | null
+          id?: string
+          invoice_no?: string
+          mode?: string
+          msisdn?: string
+          payment_id?: string | null
+          provider?: string
+          reason?: string | null
+          reference_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "momo_transactions_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -730,6 +792,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sms_messages: {
+        Row: {
+          body: string
+          created_at: string
+          error: string | null
+          id: string
+          invoice_no: string | null
+          mode: string
+          msisdn: string
+          provider: string
+          provider_ref: string | null
+          purpose: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          invoice_no?: string | null
+          mode?: string
+          msisdn: string
+          provider?: string
+          provider_ref?: string | null
+          purpose?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          invoice_no?: string | null
+          mode?: string
+          msisdn?: string
+          provider?: string
+          provider_ref?: string | null
+          purpose?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       taxpayers: {
         Row: {
