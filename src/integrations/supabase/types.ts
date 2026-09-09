@@ -926,6 +926,7 @@ export type Database = {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      current_council_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -933,6 +934,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      in_council: { Args: { _council_id: string }; Returns: boolean }
+      is_oversight: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role:
