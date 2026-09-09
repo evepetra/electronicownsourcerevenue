@@ -193,13 +193,6 @@ export type Database = {
             referencedRelation: "councils"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "council_budgets_council_id_fkey"
-            columns: ["council_id"]
-            isOneToOne: false
-            referencedRelation: "councils_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       council_documents: {
@@ -256,13 +249,6 @@ export type Database = {
             referencedRelation: "councils"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "council_documents_council_id_fkey"
-            columns: ["council_id"]
-            isOneToOne: false
-            referencedRelation: "councils_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       council_meetings: {
@@ -313,13 +299,6 @@ export type Database = {
             referencedRelation: "councils"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "council_meetings_council_id_fkey"
-            columns: ["council_id"]
-            isOneToOne: false
-            referencedRelation: "councils_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       council_spending: {
@@ -368,13 +347,6 @@ export type Database = {
             columns: ["council_id"]
             isOneToOne: false
             referencedRelation: "councils"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "council_spending_council_id_fkey"
-            columns: ["council_id"]
-            isOneToOne: false
-            referencedRelation: "councils_public"
             referencedColumns: ["id"]
           },
         ]
@@ -464,13 +436,6 @@ export type Database = {
             columns: ["council_id"]
             isOneToOne: false
             referencedRelation: "councils"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fee_schedules_council_id_fkey"
-            columns: ["council_id"]
-            isOneToOne: false
-            referencedRelation: "councils_public"
             referencedColumns: ["id"]
           },
         ]
@@ -706,13 +671,6 @@ export type Database = {
             referencedRelation: "councils"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "profiles_council_id_fkey"
-            columns: ["council_id"]
-            isOneToOne: false
-            referencedRelation: "councils_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       receipts: {
@@ -790,13 +748,6 @@ export type Database = {
             columns: ["council_id"]
             isOneToOne: false
             referencedRelation: "councils"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "recon_batches_council_id_fkey"
-            columns: ["council_id"]
-            isOneToOne: false
-            referencedRelation: "councils_public"
             referencedColumns: ["id"]
           },
         ]
@@ -941,13 +892,6 @@ export type Database = {
             referencedRelation: "councils"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "taxpayers_council_id_fkey"
-            columns: ["council_id"]
-            isOneToOne: false
-            referencedRelation: "councils_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       user_roles: {
@@ -973,27 +917,7 @@ export type Database = {
       }
     }
     Views: {
-      councils_public: {
-        Row: {
-          code: string | null
-          district: string | null
-          id: string | null
-          name: string | null
-        }
-        Insert: {
-          code?: string | null
-          district?: string | null
-          id?: string | null
-          name?: string | null
-        }
-        Update: {
-          code?: string | null
-          district?: string | null
-          id?: string | null
-          name?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       can_approve_council: { Args: { _council_id: string }; Returns: boolean }
@@ -1012,6 +936,15 @@ export type Database = {
       }
       in_council: { Args: { _council_id: string }; Returns: boolean }
       is_oversight: { Args: never; Returns: boolean }
+      list_councils_public: {
+        Args: never
+        Returns: {
+          code: string
+          district: string
+          id: string
+          name: string
+        }[]
+      }
     }
     Enums: {
       app_role:
