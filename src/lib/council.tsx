@@ -31,12 +31,15 @@ export function useCouncils() {
   return useQuery({
     queryKey: ["councils", user?.id ?? "anon"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("councils").select("*").order("name");
+      // Signed-out visitors may only read the public columns.
+      const columns = user ? "*" : "id, name, code, district";
+      const { data, error } = await supabase.from("councils").select(columns).order("name");
       if (error) throw error;
-      return (data ?? []) as Council[];
+      return (data ?? []) as unknown as Council[];
     },
   });
 }
+
 
 export function CouncilProvider({ children }: { children: ReactNode }) {
   const { data: councils } = useCouncils();
