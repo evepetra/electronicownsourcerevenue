@@ -84,7 +84,6 @@ function AuthPage() {
         staff_id: staffId || `OSR-${uid.slice(0, 6).toUpperCase()}`,
         council_id: councilId || null,
       });
-      await supabase.rpc("claim_role", { _role: role });
       await supabase.from("audit_logs").insert({
         actor: email,
         action: "STAFF_REGISTERED",
@@ -92,8 +91,12 @@ function AuthPage() {
         entity_id: uid,
         details: `Requested role ${role}`,
       });
+      setNotice(
+        "Account created. An administrator must approve your access level before you can use the modules.",
+      );
       await refresh();
       await navigate({ to: "/" });
+
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed");
     } finally {
