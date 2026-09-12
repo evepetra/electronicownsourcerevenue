@@ -936,15 +936,6 @@ export type Database = {
       }
       in_council: { Args: { _council_id: string }; Returns: boolean }
       is_oversight: { Args: never; Returns: boolean }
-      list_public_councils: {
-        Args: never
-        Returns: {
-          code: string
-          district: string
-          id: string
-          name: string
-        }[]
-      }
     }
     Enums: {
       app_role:
